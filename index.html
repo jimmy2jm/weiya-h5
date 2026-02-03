@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>2026年会邀请函</title>
+    <style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}
+#app{position:relative;width:100%;height:100%;margin:0 auto;overflow:hidden;background:#000}
+@media(min-aspect-ratio:9/16){#app{width:calc(100vh*9/16);height:100vh;margin:0 auto}}
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.screen.hidden{display:none}
+#loading-screen{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f0f23);z-index:100}
+.loading-content{text-align:center;color:#fff}
+.loading-spinner{width:50px;height:50px;border:3px solid rgba(255,255,255,0.1);border-top-color:#ffd700;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:16px;opacity:0.8;margin-bottom:10px}
+.loading-progress{font-size:24px;font-weight:bold;color:#ffd700}
+#start-screen{background:transparent;z-index:50}
+.start-bg-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.start-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:2}
+.start-content{position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;padding:20px;width:100%}
+.start-title{
+    font-size: 42px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887, #F4A460, #D2691E, #8B4513);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: title-flow 3s linear infinite;
+    letter-spacing: 4px;
+    filter: drop-shadow(0 0 15px rgba(210,105,30,0.5));
+    margin-bottom: 15px;
+}
+.start-subtitle{
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887, #F4A460, #D2691E, #8B4513);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: title-flow 3s linear infinite;
+    letter-spacing: 8px;
+    filter: drop-shadow(0 0 10px rgba(210,105,30,0.4));
+    margin-bottom: 0;
+}
+@keyframes title-flow{to{background-position:200% center}}
+.start-btn-container{position:absolute;bottom:25%;left:50%;transform:translateX(-50%);z-index:3}
+.glow-btn{
+    padding: 15px 50px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    animation: breathe 2s ease-in-out infinite;
+}
+@keyframes breathe {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(210,105,30,0.4);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(210,105,30,0.8), 0 0 60px rgba(210,105,30,0.4);
+        transform: scale(1.02);
+    }
+}
+#video-container{background:#000;z-index:10}
+.fullscreen-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.1s}
+.fullscreen-video.active{opacity:1}
+.btn-container{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);z-index:20}
+.btn-container.hidden{display:none}
+#end-screen{background:#000;z-index:30}
+.end-bg-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.end-surprise{position:absolute;top:40%;left:55%;transform:translate(-50%,-50%);z-index:2;text-align:center;width:100%}
+.surprise-text{font-size:38px;font-weight:900;background:linear-gradient(90deg,#8B4513,#D2691E,#CD853F,#DEB887,#F4A460,#D2691E,#8B4513);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:title-flow 3s linear infinite;letter-spacing:6px;filter:drop-shadow(0 0 15px rgba(210,105,30,0.5));margin-bottom:12px;white-space:nowrap}
+.end-content{position:absolute;bottom:-2%;left:50%;transform:translateX(-50%);z-index:2;text-align:center;padding:15px;width:100%}
+.end-info{margin-bottom:15px}
+.info-item{display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#5D4037;margin-bottom:10px;text-shadow:1px 1px 2px rgba(255,255,255,0.8),-1px -1px 2px rgba(255,255,255,0.5)}
+.info-item:last-child{margin-bottom:0}
+.info-icon{font-size:20px;margin-right:8px}
+.outline-btn{padding:10px 25px;font-size:13px;font-weight:500;color:#5D4037;background:rgba(255,255,255,0.6);border:1px solid rgba(139,69,19,0.3);border-radius:20px;cursor:pointer;text-shadow:none}
+.outline-btn:hover{background:rgba(255,255,255,0.8)}
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="loading-screen" class="screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">正在加载精彩内容...</p>
+            <p class="loading-progress">0%</p>
+        </div>
+    </div>
+    <div id="start-screen" class="screen hidden">
+        <video id="start-video" class="start-bg-video" playsinline webkit-playsinline muted preload="auto"></video>
+        <div class="start-overlay"></div>
+        <div class="start-content">
+            <h1 class="start-title">2026<br>三社综尾牙宴</h1>
+        </div>
+        <div class="start-btn-container">
+            <button id="start-btn" class="glow-btn">点击开始</button>
+        </div>
+    </div>
+    <div id="video-container" class="screen hidden">
+        <video id="video1" class="fullscreen-video active" playsinline webkit-playsinline x5-video-player-type="h5" preload="auto"></video>
+        <video id="video2" class="fullscreen-video" playsinline webkit-playsinline x5-video-player-type="h5" preload="auto"></video>
+        <div id="continue-btn-container" class="btn-container hidden">
+            <button id="continue-btn" class="glow-btn pulse">继续探索</button>
+        </div>
+    </div>
+    <div id="end-screen" class="screen hidden">
+        <img id="end-bg" class="end-bg-image" src="" alt="背景">
+        <div class="end-surprise">
+            <p class="surprise-text">还有彩蛋？</p>
+            <p class="surprise-text">晚会揭晓！</p>
+        </div>
+        <div class="end-content">
+            <div class="end-info">
+                <p class="info-item"><span class="info-icon">📅</span><span>2026年2月9日 18:00</span></p>
+                <p class="info-item"><span class="info-icon">📍</span><span>东海渔庄</span></p>
+                <p class="info-item"><span class="info-icon">👔</span><span>美拉德</span></p>
+            </div>
+            <button id="replay-btn" class="outline-btn">再看一次</button>
+        </div>
+    </div>
+</div>
+<script src="main.js"></script>
+</body>
+</html>
