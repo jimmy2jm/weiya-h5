@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>2026年会邀请函</title>
+    
+    <!-- 分享卡片配置 -->
+    <meta name="description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
+    
+    <!-- Open Graph (Facebook/微信) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="2026年会邀请函">
+    <meta property="og:description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
+    <meta property="og:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="2026年会邀请函">
+    <meta name="twitter:description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
+    <meta name="twitter:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png">
+    
+    <!-- 思源宋体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif}
@@ -78,14 +98,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-ap
 .btn-container.hidden{display:none}
 #end-screen{background:#000;z-index:30}
 .end-bg-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
-.end-surprise{position:absolute;top:40%;left:55%;transform:translate(-50%,-50%);z-index:2;text-align:center;width:100%}
+.end-surprise{position:absolute;top:20%;left:55%;transform:translate(-50%,-50%);z-index:2;text-align:center;width:100%}
 .surprise-text{font-size:38px;font-weight:900;background:linear-gradient(90deg,#8B4513,#D2691E,#CD853F,#DEB887,#F4A460,#D2691E,#8B4513);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:title-flow 3s linear infinite;letter-spacing:6px;filter:drop-shadow(0 0 15px rgba(210,105,30,0.5));margin-bottom:12px;white-space:nowrap}
-.end-content{position:absolute;bottom:-2%;left:50%;transform:translateX(-50%);z-index:2;text-align:center;padding:15px;width:100%}
+.end-content{position:absolute;top:30%;left:50%;transform:translateX(-50%);z-index:2;text-align:center;padding:15px;width:100%}
+.replay-btn-container{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);z-index:2}
 .end-info{margin-bottom:15px}
-.info-item{display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#5D4037;margin-bottom:10px;text-shadow:1px 1px 2px rgba(255,255,255,0.8),-1px -1px 2px rgba(255,255,255,0.5)}
+.info-item{display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#5D4037;margin-bottom:14px;text-shadow:1px 1px 2px rgba(255,255,255,0.8),-1px -1px 2px rgba(255,255,255,0.5)}
 .info-item:last-child{margin-bottom:0}
-.info-icon{font-size:20px;margin-right:8px}
-.outline-btn{padding:10px 25px;font-size:13px;font-weight:500;color:#5D4037;background:rgba(255,255,255,0.6);border:1px solid rgba(139,69,19,0.3);border-radius:20px;cursor:pointer;text-shadow:none}
+.info-icon{font-size:26px;margin-right:10px}
+.outline-btn{padding:20px 50px;font-size:26px;font-weight:500;color:#5D4037;background:rgba(255,255,255,0.6);border:2px solid rgba(139,69,19,0.3);border-radius:40px;cursor:pointer;text-shadow:none}
 .outline-btn:hover{background:rgba(255,255,255,0.8)}
     </style>
 </head>
@@ -119,326 +140,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-ap
         <img id="end-bg" class="end-bg-image" src="" alt="背景">
         <div class="end-surprise">
             <p class="surprise-text">还有彩蛋？</p>
-            <p class="surprise-text">晚会揭晓！</p>
+            <p class="surprise-text">晚会签到揭晓！</p>
         </div>
-        <div class="end-content">
-            <div class="end-info">
-                <p class="info-item"><span class="info-icon">📅</span><span>2026年2月9日 18:00</span></p>
-                <p class="info-item"><span class="info-icon">📍</span><span>东海渔庄</span></p>
-                <p class="info-item"><span class="info-icon">👔</span><span>美拉德</span></p>
-            </div>
+        <div class="replay-btn-container">
             <button id="replay-btn" class="outline-btn">再看一次</button>
         </div>
     </div>
 </div>
-<script>
-/**
- * 2026年会邀请函 - 视频播放控制
- * 核心策略：timeupdate + ended 双重检测，状态机管理
- */
-
-// ============ 配置 ============
-const CONFIG = {
-    video1Url: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/video1.mp4',
-    video2Url: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/video2.mp4',
-    endBgUrl: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png',  // 结束页背景图
-    endDelayMs: 2000,  // 视频2结束后延迟切换时间
-};
-
-// ============ 状态机 ============
-const State = {
-    LOADING: 'loading',
-    START: 'start',
-    PLAYING_V1: 'playing_v1',
-    WAITING: 'waiting',
-    PLAYING_V2: 'playing_v2',
-    END: 'end'
-};
-
-let currentState = State.LOADING;
-let cleanupFn = null;  // 当前视频的事件清理函数
-
-// ============ DOM 元素 ============
-const $ = id => document.getElementById(id);
-const elements = {
-    loadingScreen: $('loading-screen'),
-    startScreen: $('start-screen'),
-    videoContainer: $('video-container'),
-    endScreen: $('end-screen'),
-    startVideo: $('start-video'),
-    video1: $('video1'),
-    video2: $('video2'),
-    endBg: $('end-bg'),
-    continueBtn: $('continue-btn-container'),
-    progress: document.querySelector('.loading-progress'),
-};
-
-// ============ 工具函数 ============
-function showScreen(screen) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    screen.classList.remove('hidden');
-}
-
-function updateProgress(percent) {
-    elements.progress.textContent = Math.round(percent) + '%';
-}
-
-function log(msg) {
-    console.log(`[${currentState}] ${msg}`);
-}
-
-// ============ 视频播放完成检测器（核心） ============
-function createVideoEndDetector(video, onComplete) {
-    let completed = false;
-    let lastTime = -1;
-    let stuckCount = 0;
-    
-    const tryComplete = (source) => {
-        if (completed) return;
-        completed = true;
-        log(`视频播放完成 (来源: ${source})`);
-        video.pause();
-        // 清理事件
-        cleanup();
-        onComplete();
-    };
-    
-    // 主检测：timeupdate - 检查是否接近结尾
-    const onTimeUpdate = () => {
-        if (completed) return;
-        const duration = video.duration;
-        const current = video.currentTime;
-        
-        // 防止 duration 为 NaN 或 0
-        if (!duration || duration <= 0) return;
-        
-        // 当播放位置接近结尾时（剩余不到0.5秒）
-        if (current >= duration - 0.5) {
-            tryComplete('timeupdate');
-            return;
-        }
-        
-        // 检测是否卡住（播放位置长时间不变）
-        if (current === lastTime) {
-            stuckCount++;
-            if (stuckCount > 10 && current >= duration - 1) {
-                tryComplete('stuck');
-            }
-        } else {
-            stuckCount = 0;
-            lastTime = current;
-        }
-    };
-    
-    // 备用检测：ended 事件
-    const onEnded = () => {
-        tryComplete('ended');
-    };
-    
-    // 额外保险：播放暂停且接近结尾
-    const onPause = () => {
-        if (completed) return;
-        const duration = video.duration;
-        const current = video.currentTime;
-        if (duration > 0 && current >= duration - 0.5) {
-            tryComplete('pause');
-        }
-    };
-    
-    // 绑定事件
-    video.addEventListener('timeupdate', onTimeUpdate);
-    video.addEventListener('ended', onEnded);
-    video.addEventListener('pause', onPause);
-    
-    // 清理函数
-    const cleanup = () => {
-        video.removeEventListener('timeupdate', onTimeUpdate);
-        video.removeEventListener('ended', onEnded);
-        video.removeEventListener('pause', onPause);
-    };
-    
-    return cleanup;
-}
-
-// ============ 状态切换 ============
-function setState(newState) {
-    log(`状态切换: ${currentState} -> ${newState}`);
-    
-    // 清理上一个状态的事件监听
-    if (cleanupFn) {
-        cleanupFn();
-        cleanupFn = null;
-    }
-    
-    currentState = newState;
-    
-    switch (newState) {
-        case State.START:
-            showScreen(elements.startScreen);
-            break;
-            
-        case State.PLAYING_V1:
-            showScreen(elements.videoContainer);
-            elements.continueBtn.classList.add('hidden');
-            elements.video1.classList.add('active');
-            elements.video1.currentTime = 0;
-            elements.video1.play().then(() => {
-                log('视频1开始播放');
-            }).catch(e => {
-                log('视频1播放失败: ' + e.message);
-            });
-            // 设置完成检测
-            cleanupFn = createVideoEndDetector(elements.video1, () => {
-                setState(State.WAITING);
-            });
-            break;
-            
-        case State.WAITING:
-            elements.video1.pause();
-            elements.continueBtn.classList.remove('hidden');
-            log('等待用户点击继续');
-            break;
-            
-        case State.PLAYING_V2:
-            elements.continueBtn.classList.add('hidden');
-            elements.video2.currentTime = 0;
-            elements.video2.classList.add('active');
-            elements.video2.play().then(() => {
-                log('视频2开始播放');
-                // 播放成功后再隐藏视频1
-                setTimeout(() => {
-                    elements.video1.classList.remove('active');
-                }, 100);
-            }).catch(e => {
-                log('视频2播放失败: ' + e.message);
-            });
-            // 设置完成检测
-            cleanupFn = createVideoEndDetector(elements.video2, () => {
-                log(`视频2播放完成，${CONFIG.endDelayMs}ms 后切换到结束页面`);
-                setTimeout(() => {
-                    setState(State.END);
-                }, CONFIG.endDelayMs);
-            });
-            break;
-            
-        case State.END:
-            elements.video2.pause();
-            showScreen(elements.endScreen);
-            break;
-    }
-}
-
-// ============ 预加载 ============
-function preload() {
-    return new Promise((resolve) => {
-        let video1Ready = false;
-        let progress1 = 0;
-        
-        // 设置视频源
-        elements.startVideo.src = CONFIG.video1Url;
-        elements.video1.src = CONFIG.video1Url;
-        elements.video2.src = CONFIG.video2Url;
-        
-        // 设置结束页背景图
-        elements.endBg.src = CONFIG.endBgUrl;
-        
-        // 开始页面视频：加载后暂停在首帧
-        elements.startVideo.addEventListener('loadeddata', () => {
-            elements.startVideo.currentTime = 0;
-            elements.startVideo.pause();
-            log('开始页面背景视频已加载');
-        }, { once: true });
-        
-        // 通用进度更新函数
-        const updateVideoProgress = () => {
-            const video = elements.video1;
-            if (video.buffered.length > 0 && isFinite(video.duration) && video.duration > 0) {
-                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-                progress1 = (bufferedEnd / video.duration) * 100;
-                updateProgress(Math.min(progress1, 99)); // 最多99%，100%由canplaythrough触发
-            }
-        };
-        
-        // 多事件源更新进度
-        elements.video1.addEventListener('loadedmetadata', () => {
-            log(`视频1元数据已加载，时长: ${elements.video1.duration}秒`);
-            updateVideoProgress();
-        });
-        elements.video1.addEventListener('progress', updateVideoProgress);
-        elements.video1.addEventListener('loadeddata', () => {
-            updateVideoProgress();
-            if (progress1 < 30) updateProgress(30); // 保底30%
-        });
-        elements.video1.addEventListener('canplay', () => {
-            updateVideoProgress();
-            if (progress1 < 80) updateProgress(80); // 保底80%
-        });
-        
-        // 视频1可播放
-        elements.video1.addEventListener('canplaythrough', () => {
-            if (!video1Ready) {
-                video1Ready = true;
-                updateProgress(100);
-                log('视频1加载完成');
-                setTimeout(resolve, 300);
-            }
-        }, { once: true });
-        
-        // 开始加载
-        elements.startVideo.load();
-        elements.video1.load();
-        elements.video2.load();
-        
-        // 超时处理
-        setTimeout(() => {
-            if (!video1Ready && elements.video1.readyState >= 3) {
-                video1Ready = true;
-                resolve();
-            }
-        }, 30000);
-    });
-}
-
-// ============ 事件绑定 ============
-function bindEvents() {
-    // 开始按钮
-    $('start-btn').onclick = () => {
-        if (currentState === State.START) {
-            setState(State.PLAYING_V1);
-        }
-    };
-    
-    // 继续按钮
-    $('continue-btn').onclick = () => {
-        if (currentState === State.WAITING) {
-            setState(State.PLAYING_V2);
-        }
-    };
-    
-    // 重播按钮
-    $('replay-btn').onclick = () => {
-        if (currentState === State.END) {
-            // 重置视频状态
-            elements.video1.currentTime = 0;
-            elements.video2.currentTime = 0;
-            elements.video1.classList.add('active');
-            elements.video2.classList.remove('active');
-            setState(State.PLAYING_V1);
-        }
-    };
-}
-
-// ============ 初始化 ============
-async function init() {
-    log('初始化开始');
-    bindEvents();
-    await preload();
-    setState(State.START);
-    log('初始化完成');
-}
-
-// 启动
-init();
-</script>
+<script src="main.js"></script>
 </body>
 </html>
