@@ -8,7 +8,7 @@ const CONFIG = {
     video1Url: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/video1.mp4',
     video2Url: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/video2.mp4',
     endBgUrl: 'https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png',
-    endDelayMs: 2000,
+    endDelayMs: 1000,
     // 进度条配置
     minLoadingTime: 1500,      // 最小加载时间（毫秒）
     simulateMaxProgress: 80,   // 模拟进度最大值
@@ -42,7 +42,134 @@ const elements = {
     endBg: $('end-bg'),
     continueBtn: $('continue-btn-container'),
     progress: document.querySelector('.loading-progress'),
+    fadeOverlay: $('fade-overlay'),
+    bgMusic: $('bg-music'),
+    musicBtn: $('music-btn'),
 };
+
+// ============ 音乐控制 ============
+var isMuted = false;
+var musicPlaying = false;  // 标记音乐是否已成功播放
+var originalVolume = 1.0;  // 原始音量
+var lowVolume = 0.15;      // 低音量（视频播放时）
+
+function tryPlayMusic() {
+    if (musicPlaying) return;  // 已经在播放了，不重复操作
+    
+    if (elements.bgMusic) {
+        elements.bgMusic.volume = originalVolume;
+        elements.bgMusic.play().then(function() {
+            musicPlaying = true;
+            log('背景音乐开始播放');
+            showMusicBtn();
+        }).catch(function(e) {
+            log('背景音乐自动播放失败: ' + e.message);
+        });
+    }
+}
+
+function lowerMusicVolume() {
+    if (elements.bgMusic && !elements.bgMusic.paused) {
+        // 平滑降低音量
+        var currentVol = elements.bgMusic.volume;
+        var fadeInterval = setInterval(function() {
+            currentVol -= 0.05;
+            if (currentVol <= lowVolume) {
+                elements.bgMusic.volume = lowVolume;
+                clearInterval(fadeInterval);
+                log('背景音乐音量已调低至: ' + lowVolume);
+            } else {
+                elements.bgMusic.volume = currentVol;
+            }
+        }, 50);
+    }
+}
+
+function stopMusic() {
+    if (elements.bgMusic) {
+        elements.bgMusic.pause();
+        elements.bgMusic.currentTime = 0;
+        musicPlaying = false;
+        log('背景音乐已停止');
+    }
+    // 隐藏音乐按钮
+    if (elements.musicBtn) {
+        elements.musicBtn.classList.remove('show');
+    }
+}
+
+function showMusicBtn() {
+    if (elements.musicBtn) {
+        elements.musicBtn.classList.add('show');
+    }
+}
+
+function initMusicAutoPlay() {
+    // ====== 核心方案：微信环境自动播放 ======
+    // 方案1：WeixinJSBridge 已存在（页面加载较慢的情况）
+    if (typeof WeixinJSBridge !== 'undefined') {
+        log('WeixinJSBridge 已存在，尝试通过 getNetworkType 触发播放');
+        WeixinJSBridge.invoke('getNetworkType', {}, function(res) {
+            log('getNetworkType 回调触发，网络类型: ' + res.networkType);
+            tryPlayMusic();
+        });
+    }
+    
+    // 方案2：监听 WeixinJSBridgeReady 事件（页面加载较快的情况）
+    document.addEventListener('WeixinJSBridgeReady', function() {
+        log('WeixinJSBridgeReady 事件触发');
+        tryPlayMusic();
+    }, false);
+    
+    // 方案3：使用 wx.ready（如果引入了微信 JS-SDK）
+    if (typeof wx !== 'undefined' && wx.ready) {
+        wx.ready(function() {
+            log('wx.ready 触发');
+            tryPlayMusic();
+        });
+    }
+    
+    // ====== 备用方案：非微信环境 ======
+    // 尝试直接播放（某些安卓浏览器可能支持）
+    setTimeout(function() {
+        if (!musicPlaying) {
+            log('尝试直接自动播放');
+            tryPlayMusic();
+        }
+    }, 100);
+    
+    // 监听音频 canplaythrough 事件
+    if (elements.bgMusic) {
+        elements.bgMusic.addEventListener('canplaythrough', function() {
+            log('音频 canplaythrough 事件触发');
+            tryPlayMusic();
+        }, { once: true });
+    }
+    
+    // ====== 最终兜底：用户交互触发 ======
+    var playOnInteraction = function() {
+        if (musicPlaying) return;
+        log('用户交互触发播放');
+        tryPlayMusic();
+    };
+    document.addEventListener('touchstart', playOnInteraction, { once: true });
+    document.addEventListener('click', playOnInteraction, { once: true });
+}
+
+function bindMusicEvents() {
+    // 音乐按钮点击事件
+    if (elements.musicBtn) {
+        elements.musicBtn.onclick = function() {
+            isMuted = !isMuted;
+            elements.bgMusic.muted = isMuted;
+            elements.musicBtn.querySelector('.music-icon').textContent = isMuted ? '🔇' : '🔊';
+            log('音乐静音状态: ' + isMuted);
+        };
+    }
+    
+    // 立即初始化自动播放
+    initMusicAutoPlay();
+}
 
 // ============ 工具函数 ============
 function showScreen(screen) {
@@ -146,9 +273,12 @@ function setState(newState) {
     switch (newState) {
         case State.START:
             showScreen(elements.startScreen);
+            // 音乐应该在加载阶段就已经开始播放了，这里不需要再操作
             break;
             
         case State.PLAYING_V1:
+            // 调低背景音乐音量（而不是停止）
+            lowerMusicVolume();
             showScreen(elements.videoContainer);
             elements.continueBtn.classList.add('hidden');
             elements.video1.classList.add('active');
@@ -185,10 +315,17 @@ function setState(newState) {
             });
             // 设置完成检测
             cleanupFn = createVideoEndDetector(elements.video2, function() {
-                log('视频2播放完成，' + CONFIG.endDelayMs + 'ms 后切换到结束页面');
+                log('视频2播放完成，开始淡出过渡');
+                // 淡出（显示黑色遮罩）
+                elements.fadeOverlay.classList.add('active');
+                // 等待淡出完成后切换页面
                 setTimeout(function() {
                     setState(State.END);
-                }, CONFIG.endDelayMs);
+                    // 淡入（隐藏黑色遮罩）
+                    setTimeout(function() {
+                        elements.fadeOverlay.classList.remove('active');
+                    }, 100);
+                }, 500); // 500ms 淡出时间
             });
             break;
             
@@ -370,6 +507,7 @@ function bindEvents() {
 function init() {
     log('初始化开始 (平滑进度版)');
     bindEvents();
+    bindMusicEvents();
     preload().then(function() {
         setState(State.START);
         log('初始化完成');
