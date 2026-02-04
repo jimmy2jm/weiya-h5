@@ -1,6 +1,6 @@
 /**
- * 2026年会邀请函 - 视频播放控制 (V2 - 平滑进度版)
- * 核心策略：模拟进度 + 真实进度结合
+ * 2026年会邀请函 - 视频播放控制
+ * 核心策略：timeupdate + ended 双重检测，状态机管理，平滑进度显示
  */
 
 // ============ 配置 ============
@@ -27,7 +27,7 @@ const State = {
 };
 
 let currentState = State.LOADING;
-let cleanupFn = null;
+let cleanupFn = null;  // 当前视频的事件清理函数
 
 // ============ DOM 元素 ============
 const $ = function(id) { return document.getElementById(id); };
@@ -69,22 +69,27 @@ function createVideoEndDetector(video, onComplete) {
         completed = true;
         log('视频播放完成 (来源: ' + source + ')');
         video.pause();
+        // 清理事件
         cleanup();
         onComplete();
     };
     
+    // 主检测：timeupdate - 检查是否接近结尾
     var onTimeUpdate = function() {
         if (completed) return;
         var duration = video.duration;
         var current = video.currentTime;
         
+        // 防止 duration 为 NaN 或 0
         if (!duration || duration <= 0) return;
         
+        // 当播放位置接近结尾时（剩余不到0.5秒）
         if (current >= duration - 0.5) {
             tryComplete('timeupdate');
             return;
         }
         
+        // 检测是否卡住（播放位置长时间不变）
         if (current === lastTime) {
             stuckCount++;
             if (stuckCount > 10 && current >= duration - 1) {
@@ -96,10 +101,12 @@ function createVideoEndDetector(video, onComplete) {
         }
     };
     
+    // 备用检测：ended 事件
     var onEnded = function() {
         tryComplete('ended');
     };
     
+    // 额外保险：播放暂停且接近结尾
     var onPause = function() {
         if (completed) return;
         var duration = video.duration;
@@ -109,10 +116,12 @@ function createVideoEndDetector(video, onComplete) {
         }
     };
     
+    // 绑定事件
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('ended', onEnded);
     video.addEventListener('pause', onPause);
     
+    // 清理函数
     var cleanup = function() {
         video.removeEventListener('timeupdate', onTimeUpdate);
         video.removeEventListener('ended', onEnded);
@@ -126,6 +135,7 @@ function createVideoEndDetector(video, onComplete) {
 function setState(newState) {
     log('状态切换: ' + currentState + ' -> ' + newState);
     
+    // 清理上一个状态的事件监听
     if (cleanupFn) {
         cleanupFn();
         cleanupFn = null;
@@ -148,6 +158,7 @@ function setState(newState) {
             }).catch(function(e) {
                 log('视频1播放失败: ' + e.message);
             });
+            // 设置完成检测
             cleanupFn = createVideoEndDetector(elements.video1, function() {
                 setState(State.WAITING);
             });
@@ -165,12 +176,14 @@ function setState(newState) {
             elements.video2.classList.add('active');
             elements.video2.play().then(function() {
                 log('视频2开始播放');
+                // 播放成功后再隐藏视频1
                 setTimeout(function() {
                     elements.video1.classList.remove('active');
                 }, 100);
             }).catch(function(e) {
                 log('视频2播放失败: ' + e.message);
             });
+            // 设置完成检测
             cleanupFn = createVideoEndDetector(elements.video2, function() {
                 log('视频2播放完成，' + CONFIG.endDelayMs + 'ms 后切换到结束页面');
                 setTimeout(function() {
@@ -186,7 +199,7 @@ function setState(newState) {
     }
 }
 
-// ============ 预加载（V2 - 平滑进度版） ============
+// ============ 预加载（平滑进度版） ============
 function preload() {
     return new Promise(function(resolve) {
         var videoReady = false;        // 视频是否真正准备好
@@ -326,20 +339,24 @@ function preload() {
 
 // ============ 事件绑定 ============
 function bindEvents() {
+    // 开始按钮
     $('start-btn').onclick = function() {
         if (currentState === State.START) {
             setState(State.PLAYING_V1);
         }
     };
     
+    // 继续按钮
     $('continue-btn').onclick = function() {
         if (currentState === State.WAITING) {
             setState(State.PLAYING_V2);
         }
     };
     
+    // 重播按钮
     $('replay-btn').onclick = function() {
         if (currentState === State.END) {
+            // 重置视频状态
             elements.video1.currentTime = 0;
             elements.video2.currentTime = 0;
             elements.video1.classList.add('active');
@@ -351,7 +368,7 @@ function bindEvents() {
 
 // ============ 初始化 ============
 function init() {
-    log('初始化开始 (V2 平滑进度版)');
+    log('初始化开始 (平滑进度版)');
     bindEvents();
     preload().then(function() {
         setState(State.START);
