@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>2026年会邀请函</title>
+    <title>2026三社综 尾牙宴邀请函</title>
     
     <!-- 分享卡片配置 -->
     <meta name="description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
     
     <!-- Open Graph (Facebook/微信) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="2026年会邀请函">
-    <meta property="og:description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
-    <meta property="og:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png">
+    <meta property="og:title" content="2026三社综 尾牙宴邀请函">
+    <meta property="og:description" content="请查收这份热气腾腾的年度彩头！一定要看完哦！！">
+    <meta property="og:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/share.png">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="2026年会邀请函">
-    <meta name="twitter:description" content="诚邀您参加2026年三社综尾牙宴，共度美好时光！">
-    <meta name="twitter:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/end-bg.png">
+    <meta name="twitter:title" content="2026三社综 尾牙宴邀请函">
+    <meta name="twitter:description" content="请查收这份热气腾腾的年度彩头！一定要看完哦！！">
+    <meta name="twitter:image" content="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/share.png">
     
     <!-- 思源宋体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -109,10 +109,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-ap
 .info-icon{font-size:26px;margin-right:10px}
 .outline-btn{padding:15px 35px;font-size:20px;font-weight:500;color:#5D4037;background:rgba(255,255,255,0.6);border:2px solid rgba(139,69,19,0.3);border-radius:30px;cursor:pointer;text-shadow:none;white-space:nowrap}
 .outline-btn:hover{background:rgba(255,255,255,0.8)}
+#fade-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;opacity:0;pointer-events:none;z-index:200;transition:opacity 0.5s ease}
+#fade-overlay.active{opacity:1}
+.music-btn{position:fixed;top:20px;right:20px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.3);cursor:pointer;z-index:999;display:none;align-items:center;justify-content:center;transition:background 0.3s}
+.music-btn.show{display:flex}
+.music-btn:active{background:rgba(0,0,0,0.7)}
+.music-icon{font-size:20px;line-height:1}
     </style>
 </head>
 <body>
+<!-- 微信 JS-SDK：用于自动播放音乐 -->
+<script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+<script>
+// 配置微信 JS-SDK（即使配置信息为空也能触发 wx.ready）
+if (typeof wx !== 'undefined') {
+    wx.config({
+        debug: false,
+        appId: '',
+        timestamp: 1,
+        nonceStr: '',
+        signature: '',
+        jsApiList: []
+    });
+}
+</script>
 <div id="app">
+    <audio id="bg-music" src="https://weiya-h5-1400603784.cos.ap-guangzhou.myqcloud.com/assets/music.mp3" loop preload="auto"></audio>
+    <button id="music-btn" class="music-btn">
+        <span class="music-icon">🔊</span>
+    </button>
+    <div id="fade-overlay"></div>
     <div id="loading-screen" class="screen">
         <div class="loading-content">
             <div class="loading-spinner"></div>
@@ -134,7 +160,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-ap
         <video id="video1" class="fullscreen-video active" playsinline webkit-playsinline x5-video-player-type="h5" preload="auto"></video>
         <video id="video2" class="fullscreen-video" playsinline webkit-playsinline x5-video-player-type="h5" preload="auto"></video>
         <div id="continue-btn-container" class="btn-container hidden">
-            <button id="continue-btn" class="continue-btn">继续探索</button>
+            <button id="continue-btn" class="glow-btn">收下好运</button>
         </div>
     </div>
     <div id="end-screen" class="screen hidden">
@@ -144,7 +170,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:-ap
             <p class="surprise-text">晚会签到揭晓！</p>
         </div>
         <div class="replay-btn-container">
-            <button id="replay-btn" class="outline-btn">再看一次</button>
+            <button id="replay-btn" class="glow-btn">再看一次</button>
         </div>
     </div>
 </div>
